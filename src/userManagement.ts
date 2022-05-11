@@ -4,7 +4,9 @@ import { AuthUser, AuthUserScheme } from "./contracts/authUser";
 import { User } from './databaseModels/user';
 
 export function routeUserManagement(config: Configuration): void {
-    config.app.get('/auth-user', async (req, res) => {
+
+
+    config.app.get('/login-user', async (req, res) => {
         res.setHeader('content-type', 'application/json');
         const body = req.body as AuthUser;
         try {
