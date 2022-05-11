@@ -1,6 +1,6 @@
 import { Configuration } from './configuration';
 import bcrypt from 'bcrypt';
-import { AuthUser, AuthUserScheme } from "./contracts/authUser";
+import { LoginUser, LoginUserScheme } from "./contracts/loginUser";
 import { User } from './databaseModels/user';
 
 export function routeUserManagement(config: Configuration): void {
@@ -8,9 +8,9 @@ export function routeUserManagement(config: Configuration): void {
 
     config.app.get('/login-user', async (req, res) => {
         res.setHeader('content-type', 'application/json');
-        const body = req.body as AuthUser;
+        const body = req.body as LoginUser;
         try {
-            await AuthUserScheme.validateAsync(body);
+            await LoginUserScheme.validateAsync(body);
         }
         catch (error) {
             res.send({ error: "Invalid JSON format" });
