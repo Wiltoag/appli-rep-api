@@ -1,7 +1,8 @@
 import { WithId } from "mongodb";
 
-export interface User extends WithId<Document> {
+export interface User extends Document {
     user: string;
     pass: string;
     token: string;
+    name: string;
 }
