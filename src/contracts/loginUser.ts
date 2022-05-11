@@ -4,7 +4,11 @@ export interface LoginUser {
     user: string;
     pass: string;
 }
-export const LoginUserScheme = Joi.object({
+export const LoginUserScheme: LoginUser = {
+    user: "user id",
+    pass: "password"
+};
+export const LoginUserContract = Joi.object({
     user: Joi.string().required(),
     pass: Joi.string().required()
 });

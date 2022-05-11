@@ -12,3 +12,7 @@ export const escapeHtml = (text: string): string => {
 
     return text.replace(/[&<>"']/g, (m) => map.get(m) ?? m);
 }
+
+export const invalidJson = (scheme: object): object => {
+    return { error: "Invalid JSON format", expected: scheme };
+};

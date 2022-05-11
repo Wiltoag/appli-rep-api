@@ -1,8 +1,8 @@
-import { RegisterOwner, RegisterOwnerScheme } from './contracts/registerOwner';
+import { RegisterOwner, RegisterOwnerContract, RegisterOwnerScheme } from './contracts/registerOwner';
 import { Configuration } from './configuration';
-import { LoginOwner, LoginOwnerScheme } from "./contracts/loginOwner";
+import { LoginOwner, LoginOwnerContract, LoginOwnerScheme } from "./contracts/loginOwner";
 import { Owner } from './databaseModels/owner';
-import { normalize } from './utilities';
+import { normalize, invalidJson } from './utilities';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -16,10 +16,10 @@ export const routeOwnerManagement = (config: Configuration): void => {
         res.setHeader('content-type', 'application/json');
         const body = req.body as LoginOwner;
         try {
-            await LoginOwnerScheme.validateAsync(body);
+            await LoginOwnerContract.validateAsync(body);
         }
         catch (error) {
-            res.send({ error: "Invalid JSON format" });
+            res.send(invalidJson(LoginOwnerScheme));
             return;
         }
         body.user = normalize(body.user);
@@ -40,10 +40,10 @@ export const routeOwnerManagement = (config: Configuration): void => {
         res.setHeader('content-type', 'application/json');
         const body = req.body as RegisterOwner;
         try {
-            await RegisterOwnerScheme.validateAsync(body);
+            await RegisterOwnerContract.validateAsync(body);
         }
         catch (error) {
-            res.send({ error: "Invalid JSON format" });
+            res.send(invalidJson(RegisterOwnerScheme));
             return;
         }
         if (await config.owners.findOne({ user: body.user }) != null) {

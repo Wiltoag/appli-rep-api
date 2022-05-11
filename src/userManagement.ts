@@ -1,8 +1,8 @@
-import { RegisterUser, RegisterUserScheme } from './contracts/registerUser';
+import { RegisterUser, RegisterUserContract, RegisterUserScheme } from './contracts/registerUser';
 import { Configuration } from './configuration';
-import { LoginUser, LoginUserScheme } from "./contracts/loginUser";
+import { LoginUser, LoginUserContract, LoginUserScheme } from "./contracts/loginUser";
 import { User } from './databaseModels/user';
-import { normalize } from './utilities';
+import { normalize, invalidJson } from './utilities';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -16,10 +16,10 @@ export const routeUserManagement = (config: Configuration): void => {
         res.setHeader('content-type', 'application/json');
         const body = req.body as LoginUser;
         try {
-            await LoginUserScheme.validateAsync(body);
+            await LoginUserContract.validateAsync(body);
         }
         catch (error) {
-            res.send({ error: "Invalid JSON format" });
+            res.send(invalidJson(LoginUserScheme));
             return;
         }
         body.user = normalize(body.user);
@@ -40,10 +40,10 @@ export const routeUserManagement = (config: Configuration): void => {
         res.setHeader('content-type', 'application/json');
         const body = req.body as RegisterUser;
         try {
-            await RegisterUserScheme.validateAsync(body);
+            await RegisterUserContract.validateAsync(body);
         }
         catch (error) {
-            res.send({ error: "Invalid JSON format" });
+            res.send(invalidJson(RegisterUserScheme));
             return;
         }
         if (await config.users.findOne({ user: body.user }) != null) {
