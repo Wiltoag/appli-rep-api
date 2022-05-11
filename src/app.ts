@@ -1,3 +1,4 @@
+import { routeOwnerManagement } from './ownerManagement';
 import { Configuration } from './configuration';
 import { Db, MongoClient } from 'mongodb';
 import express from 'express';
@@ -5,7 +6,8 @@ import { routeUserManagement } from './userManagement';
 
 const configuration: Configuration = {
     app: express(),
-    users: null!
+    users: null!,
+    owners: null!
 };
 configuration.app.use(express.json());
 const port = 80;
@@ -19,11 +21,13 @@ configuration.app.get('/', (req, res) => {
 });
 
 routeUserManagement(configuration);
+routeOwnerManagement(configuration);
 
 configuration.app.listen(port, async () => {
     await mongoClient.connect();
     const db = mongoClient.db("applirep");
     await db.command({ ping: 1 });
     configuration.users = db.collection("users");
+    configuration.owners = db.collection("owners");
     console.log(`Express is listening at http://localhost:${port}`);
 });

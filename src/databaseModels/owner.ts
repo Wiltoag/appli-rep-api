@@ -1,4 +1,4 @@
-export interface User {
+export interface Owner {
     user: string;
     pass: string;
     token: string;

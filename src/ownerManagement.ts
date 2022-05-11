@@ -1,7 +1,7 @@
-import { RegisterUser, RegisterUserScheme } from './contracts/registerUser';
+import { RegisterOwner, RegisterOwnerScheme } from './contracts/registerOwner';
 import { Configuration } from './configuration';
-import { LoginUser, LoginUserScheme } from "./contracts/loginUser";
-import { User } from './databaseModels/user';
+import { LoginOwner, LoginOwnerScheme } from "./contracts/loginOwner";
+import { Owner } from './databaseModels/owner';
 import { normalize } from './utilities';
 
 import bcrypt from 'bcrypt';
@@ -9,21 +9,21 @@ import crypto from 'crypto';
 
 const cryptRounds = 5;
 
-export const routeUserManagement = (config: Configuration): void => {
+export const routeOwnerManagement = (config: Configuration): void => {
 
 
-    config.app.get('/login-user', async (req, res) => {
+    config.app.get('/login-owner', async (req, res) => {
         res.setHeader('content-type', 'application/json');
-        const body = req.body as LoginUser;
+        const body = req.body as LoginOwner;
         try {
-            await LoginUserScheme.validateAsync(body);
+            await LoginOwnerScheme.validateAsync(body);
         }
         catch (error) {
             res.send({ error: "Invalid JSON format" });
             return;
         }
         body.user = normalize(body.user);
-        const user = await config.users.findOne({ user: body.user }) as User;
+        const user = await config.owners.findOne({ user: body.user }) as Owner;
         if (user == null) {
             res.send({ error: "Invalid credentials" });
             return;
@@ -36,27 +36,27 @@ export const routeUserManagement = (config: Configuration): void => {
     });
 
 
-    config.app.get('/register-user', async (req, res) => {
+    config.app.get('/register-owner', async (req, res) => {
         res.setHeader('content-type', 'application/json');
-        const body = req.body as RegisterUser;
+        const body = req.body as RegisterOwner;
         try {
-            await RegisterUserScheme.validateAsync(body);
+            await RegisterOwnerScheme.validateAsync(body);
         }
         catch (error) {
             res.send({ error: "Invalid JSON format" });
             return;
         }
-        if (await config.users.findOne({ user: body.user }) != null) {
-            res.send({ error: "User already exists" });
+        if (await config.owners.findOne({ user: body.user }) != null) {
+            res.send({ error: "Owner already exists" });
             return;
         }
-        const user: User = {
+        const user: Owner = {
             user: normalize(body.user),
             pass: await bcrypt.hash(body.pass, cryptRounds),
             name: body.name,
             token: crypto.randomUUID()
         };
-        config.users.insertOne(user);
+        config.owners.insertOne(user);
 
         res.send({ token: user.token });
     });
