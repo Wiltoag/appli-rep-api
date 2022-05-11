@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { RegisterUser, RegisterUserContract, RegisterUserScheme } from './contracts/registerUser';
 import { Configuration } from './configuration';
 import { LoginUser, LoginUserContract, LoginUserScheme } from "./contracts/loginUser";
@@ -12,8 +13,8 @@ const cryptRounds = 5;
 export const routeUserManagement = (config: Configuration): void => {
 
 
-    config.app.get('/login-user', async (req, res) => {
-        res.setHeader('content-type', 'application/json');
+    config.app.post('/login-user', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
         const body = req.body as LoginUser;
         try {
             await LoginUserContract.validateAsync(body);
@@ -36,8 +37,8 @@ export const routeUserManagement = (config: Configuration): void => {
     });
 
 
-    config.app.get('/register-user', async (req, res) => {
-        res.setHeader('content-type', 'application/json');
+    config.app.post('/register-user', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
         const body = req.body as RegisterUser;
         try {
             await RegisterUserContract.validateAsync(body);
@@ -46,12 +47,14 @@ export const routeUserManagement = (config: Configuration): void => {
             res.send(invalidJson(RegisterUserScheme));
             return;
         }
+        body.user = normalize(body.user);
         if (await config.users.findOne({ user: body.user }) != null) {
             res.send({ error: "User already exists" });
             return;
         }
         const user: User = {
-            user: normalize(body.user),
+            _id: new ObjectId(),
+            user: body.user,
             pass: await bcrypt.hash(body.pass, cryptRounds),
             name: body.name,
             token: crypto.randomUUID()

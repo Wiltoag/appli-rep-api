@@ -1,3 +1,4 @@
+import { routeCampingManagement } from './campingManagement';
 import { routeOwnerManagement } from './ownerManagement';
 import { Configuration } from './configuration';
 import { Db, MongoClient } from 'mongodb';
@@ -10,7 +11,7 @@ const configuration: Configuration = {
     owners: null!
 };
 configuration.app.use(express.json());
-const port = 80;
+const port = 16548;
 const dbPort = 27017;
 
 const mongoClient = new MongoClient(`mongodb://localhost:${dbPort}`);
@@ -22,6 +23,7 @@ configuration.app.get('/', (req, res) => {
 
 routeUserManagement(configuration);
 routeOwnerManagement(configuration);
+routeCampingManagement(configuration);
 
 configuration.app.listen(port, async () => {
     await mongoClient.connect();
