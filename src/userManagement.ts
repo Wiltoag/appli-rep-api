@@ -2,6 +2,7 @@ import { Configuration } from './configuration';
 import bcrypt from 'bcrypt';
 import { LoginUser, LoginUserScheme } from "./contracts/loginUser";
 import { User } from './databaseModels/user';
+import { normalize } from './utilities';
 
 export function routeUserManagement(config: Configuration): void {
 
@@ -16,7 +17,8 @@ export function routeUserManagement(config: Configuration): void {
             res.send({ error: "Invalid JSON format" });
             return;
         }
-        console.log(body);
+        body.user = normalize(body.user);
+        console.log(body.user);
         const user = await config.database.collection("users").findOne({ user: body.user }) as User;
         if (user == null) {
             res.send({ error: "Invalid credentials" });
