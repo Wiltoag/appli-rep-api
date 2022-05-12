@@ -1,19 +1,69 @@
+import { ChangePassOwner, ChangePassOwnerContract, ChangePassOwnerScheme } from './contracts/changePassOwner';
+import { GenTokenOwner, GenTokenOwnerContract, GenTokenOwnerScheme } from './contracts/genTokenOwner';
 import { ObjectId } from 'mongodb';
 import { RegisterOwner, RegisterOwnerContract, RegisterOwnerScheme } from './contracts/registerOwner';
 import { Configuration } from './configuration';
 import { LoginOwner, LoginOwnerContract, LoginOwnerScheme } from "./contracts/loginOwner";
 import { Owner } from './databaseModels/owner';
-import { normalize, invalidJson } from './utilities';
+import { normalize, invalidJson, generateToken } from './utilities';
 
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 
 const cryptRounds = 5;
 
 export const routeOwnerManagement = (config: Configuration): void => {
 
 
-    config.app.post('/login-owner', async (req, res) => {
+    config.app.post('/owner/generate-token', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        const body = req.body as GenTokenOwner;
+        try {
+            await GenTokenOwnerContract.validateAsync(body);
+        }
+        catch (error) {
+            res.send(invalidJson(GenTokenOwnerScheme));
+            return;
+        }
+        const newToken = generateToken();
+        var result = await config.owners.updateOne({ token: body.token }, { $set: { token: newToken } });
+        if (result.matchedCount == 0) {
+            res.send({ error: "Invalid token" });
+            return;
+        }
+        res.send({ token: newToken });
+    });
+
+
+
+    config.app.post('/owner/change-pass', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        const body = req.body as ChangePassOwner;
+        try {
+            await ChangePassOwnerContract.validateAsync(body);
+        }
+        catch (error) {
+            res.send(invalidJson(ChangePassOwnerScheme));
+            return;
+        }
+        body.user = normalize(body.user);
+        const user = await config.owners.findOne({ user: body.user }) as Owner;
+        if (user == null) {
+            res.send({ error: "Invalid credentials" });
+            return;
+        }
+        if (!await bcrypt.compare(body.pass, user.pass)) {
+            res.send({ error: "Invalid credentials" });
+            return;
+        }
+        const newPass = await bcrypt.hash(body.newPass, cryptRounds);
+        const newToken = generateToken();
+        await config.owners.updateOne({ _id: user._id }, { $set: { pass: newPass, token: newToken } });
+        res.send({ token: newToken });
+    });
+
+
+
+    config.app.post('/owner/login', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         const body = req.body as LoginOwner;
         try {
@@ -37,7 +87,7 @@ export const routeOwnerManagement = (config: Configuration): void => {
     });
 
 
-    config.app.post('/register-owner', async (req, res) => {
+    config.app.post('/owner/register', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         const body = req.body as RegisterOwner;
         try {
@@ -57,7 +107,7 @@ export const routeOwnerManagement = (config: Configuration): void => {
             user: body.user,
             pass: await bcrypt.hash(body.pass, cryptRounds),
             name: body.name,
-            token: crypto.randomUUID(),
+            token: generateToken(),
             campings: [{
                 _id: new ObjectId(),
                 coordinates: {

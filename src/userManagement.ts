@@ -1,9 +1,11 @@
+import { ChangePassUser, ChangePassUserScheme, ChangePassUserContract } from './contracts/changePassUser';
+import { GenTokenUser, GenTokenUserContract, GenTokenUserScheme } from './contracts/genTokenUser';
 import { ObjectId } from 'mongodb';
 import { RegisterUser, RegisterUserContract, RegisterUserScheme } from './contracts/registerUser';
 import { Configuration } from './configuration';
 import { LoginUser, LoginUserContract, LoginUserScheme } from "./contracts/loginUser";
 import { User } from './databaseModels/user';
-import { normalize, invalidJson } from './utilities';
+import { normalize, invalidJson, generateToken } from './utilities';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -13,7 +15,55 @@ const cryptRounds = 5;
 export const routeUserManagement = (config: Configuration): void => {
 
 
-    config.app.post('/login-user', async (req, res) => {
+    config.app.post('/user/generate-token', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        const body = req.body as GenTokenUser;
+        try {
+            await GenTokenUserContract.validateAsync(body);
+        }
+        catch (error) {
+            res.send(invalidJson(GenTokenUserScheme));
+            return;
+        }
+        const newToken = generateToken();
+        var result = await config.users.updateOne({ token: body.token }, { $set: { token: newToken } });
+        if (result.matchedCount == 0) {
+            res.send({ error: "Invalid token" });
+            return;
+        }
+        res.send({ token: newToken });
+    });
+
+
+
+    config.app.post('/user/change-pass', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        const body = req.body as ChangePassUser;
+        try {
+            await ChangePassUserContract.validateAsync(body);
+        }
+        catch (error) {
+            res.send(invalidJson(ChangePassUserScheme));
+            return;
+        }
+        body.user = normalize(body.user);
+        const user = await config.users.findOne({ user: body.user }) as User;
+        if (user == null) {
+            res.send({ error: "Invalid credentials" });
+            return;
+        }
+        if (!await bcrypt.compare(body.pass, user.pass)) {
+            res.send({ error: "Invalid credentials" });
+            return;
+        }
+        const newPass = await bcrypt.hash(body.newPass, cryptRounds);
+        const newToken = generateToken();
+        await config.users.updateOne({ _id: user._id }, { $set: { pass: newPass, token: newToken } });
+        res.send({ token: newToken });
+    });
+
+
+    config.app.post('/user/login', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         const body = req.body as LoginUser;
         try {
@@ -37,7 +87,7 @@ export const routeUserManagement = (config: Configuration): void => {
     });
 
 
-    config.app.post('/register-user', async (req, res) => {
+    config.app.post('/user/register', async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         const body = req.body as RegisterUser;
         try {
