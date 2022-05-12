@@ -21,9 +21,9 @@ Démarrez la base de données :
 ```bash
 mongod --port 27017 --dbpath db
 ```
-*Les données de la base de données seront dans le dossier `db`.*
+*Les données de la base de données seront dans le dossier `db`. Vous pouvez changer ce dossier.*
 
-Initialisez via `npm` :
+Dans un nouvel interpreteur, dans le même dossier, initialisez via `npm` :
 ```bash
 npm i
 ```
@@ -31,6 +31,8 @@ npm i
 Compilez les scripts typescript :
 ```bash
 npx tsc
+# ou alors, pour le développement, permet de recopmiler automatiquement les scripts. Un nouvel interpréteur sera nécéssaire.
+npx tsc --watch
 ```
 
 Enfin lancez l'API :
