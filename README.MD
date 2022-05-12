@@ -12,6 +12,11 @@ Dans un intérpréteur de commandes, déplacez-vous dans un dossier sans les dro
 git clone https://github.com/Wiltoag/appli-rep-api.git
 ```
 
+Déplacez-vous dans ce dossier :
+```bash
+cd appli-rep-api
+```
+
 Démarrez la base de données :
 ```bash
 mongod --port 27017 --dbpath db
