@@ -9,6 +9,7 @@ import { normalize, invalidJson, generateToken } from './utilities';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { Errors } from './errors';
 
 const cryptRounds = 5;
 
@@ -28,7 +29,7 @@ export const routeUserManagement = (config: Configuration): void => {
         const newToken = generateToken();
         var result = await config.users.updateOne({ token: body.token }, { $set: { token: newToken } });
         if (result.matchedCount == 0) {
-            res.send({ error: "Invalid token" });
+            res.send(Errors.invalidToken);
             return;
         }
         res.send({ token: newToken });
@@ -49,11 +50,11 @@ export const routeUserManagement = (config: Configuration): void => {
         body.user = normalize(body.user);
         const user = await config.users.findOne({ user: body.user }) as User;
         if (user == null) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         if (!await bcrypt.compare(body.pass, user.pass)) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         const newPass = await bcrypt.hash(body.newPass, cryptRounds);
@@ -76,11 +77,11 @@ export const routeUserManagement = (config: Configuration): void => {
         body.user = normalize(body.user);
         const user = await config.users.findOne({ user: body.user }) as User;
         if (user == null) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         if (!await bcrypt.compare(body.pass, user.pass)) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         res.send({ token: user.token });
@@ -99,7 +100,7 @@ export const routeUserManagement = (config: Configuration): void => {
         }
         body.user = normalize(body.user);
         if (await config.users.findOne({ user: body.user }) != null) {
-            res.send({ error: "User already exists" });
+            res.send(Errors.userAlreadyExists);
             return;
         }
         const user: User = {

@@ -8,6 +8,7 @@ import { Owner } from './databaseModels/owner';
 import { normalize, invalidJson, generateToken } from './utilities';
 
 import bcrypt from 'bcrypt';
+import { Errors } from './errors';
 
 const cryptRounds = 5;
 
@@ -27,7 +28,7 @@ export const routeOwnerManagement = (config: Configuration): void => {
         const newToken = generateToken();
         var result = await config.owners.updateOne({ token: body.token }, { $set: { token: newToken } });
         if (result.matchedCount == 0) {
-            res.send({ error: "Invalid token" });
+            res.send(Errors.invalidToken);
             return;
         }
         res.send({ token: newToken });
@@ -48,11 +49,11 @@ export const routeOwnerManagement = (config: Configuration): void => {
         body.user = normalize(body.user);
         const user = await config.owners.findOne({ user: body.user }) as Owner;
         if (user == null) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         if (!await bcrypt.compare(body.pass, user.pass)) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         const newPass = await bcrypt.hash(body.newPass, cryptRounds);
@@ -76,11 +77,11 @@ export const routeOwnerManagement = (config: Configuration): void => {
         body.user = normalize(body.user);
         const user = await config.owners.findOne({ user: body.user }) as Owner;
         if (user == null) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         if (!await bcrypt.compare(body.pass, user.pass)) {
-            res.send({ error: "Invalid credentials" });
+            res.send(Errors.invalidCredentials);
             return;
         }
         res.send({ token: user.token });
@@ -99,7 +100,7 @@ export const routeOwnerManagement = (config: Configuration): void => {
         }
         body.user = normalize(body.user);
         if (await config.owners.findOne({ user: body.user }) != null) {
-            res.send({ error: "Owner already exists" });
+            res.send(Errors.ownerAlreadyExists);
             return;
         }
         const owner: Owner = {

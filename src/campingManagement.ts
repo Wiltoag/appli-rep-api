@@ -2,6 +2,7 @@ import { Owner } from './databaseModels/owner';
 import { invalidJson } from './utilities';
 import { CampingMe, CampingMeContract, CampingMeScheme } from './contracts/campingsMe';
 import { Configuration } from './configuration';
+import { Errors } from './errors';
 
 export const routeCampingManagement = (config: Configuration): void => {
 
@@ -17,7 +18,7 @@ export const routeCampingManagement = (config: Configuration): void => {
         }
         const user = await config.owners.findOne({ token: body.token }) as Owner;
         if (user == null) {
-            res.send({ error: "Invalid token" });
+            res.send(Errors.invalidToken);
             return;
         }
         user.campings.forEach(camping => {
