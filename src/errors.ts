@@ -23,4 +23,8 @@ export abstract class Errors {
         error: "The camping with this id does not exist",
         code: 5
     };
+    static noPlaceAvailable = {
+        error: "The camping has no more place of the given type",
+        code: 6
+    };
 }

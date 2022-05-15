@@ -1,3 +1,5 @@
+import { User } from './databaseModels/user';
+import { CampingReserve, CampingReserveContract, CampingReserveScheme } from './contracts/campingsReserve';
 import { CampingDetail, CampingDetailContract, CampingDetailScheme } from './contracts/campingsDetail';
 import { ObjectId } from 'mongodb';
 import { CampingCreate, CampingCreateContract, CampingCreateScheme } from './contracts/campingsCreate';
@@ -57,7 +59,11 @@ export const routeCampingManagement = (config: Configuration): void => {
                 available: body.campingcarPlaces
             }
         };
-        await config.owners.updateOne({ token: body.token }, { $push: { campings: camping } });
+        const result = await config.owners.updateOne({ token: body.token }, { $push: { campings: camping } });
+        if (result.matchedCount == 0) {
+            res.send(Errors.invalidToken);
+            return;
+        }
         res.send({ id: camping._id });
     });
 
@@ -87,6 +93,44 @@ export const routeCampingManagement = (config: Configuration): void => {
             }
             delete camping._id;
             res.send(camping);
+        } catch (error) {
+            res.send(Errors.campingIdDoesNotExist);
+            return;
+        }
+    });
+
+
+    config.app.post("/campings/reserve", async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        const body = req.body as CampingReserve;
+        try {
+            await CampingReserveContract.validateAsync(body);
+        }
+        catch (error) {
+            res.send(invalidJson(CampingReserveScheme));
+            return;
+        }
+        try {
+            const camping = (await config.owners.aggregate([{ $unwind: "$campings" }, { $match: { "campings._id": new ObjectId(body.id) } }]).next())?.campings as Camping;
+            if (camping == null) {
+                res.send(Errors.campingIdDoesNotExist);
+                return;
+            }
+            const user = await config.users.findOne({ token: body.token }) as User;
+            if (user == null) {
+                res.send(Errors.invalidToken);
+                return;
+            }
+            switch (body.mode) {
+                case "bungalow":
+                    if (camping.bungalows.available > 0) {
+
+                    } else {
+                        res.send(Errors.noPlaceAvailable);
+                        return;
+                    }
+            }
+
         } catch (error) {
             res.send(Errors.campingIdDoesNotExist);
             return;
