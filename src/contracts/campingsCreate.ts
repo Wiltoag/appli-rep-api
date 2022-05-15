@@ -8,6 +8,7 @@ export interface CampingCreate {
     };
     name: string;
     description: string;
+    city: string;
     bungalows: number;
     tentPlaces: number;
     campingcarPlaces: number;
@@ -20,6 +21,7 @@ export const CampingCreateScheme: CampingCreate = {
     },
     name: "name of the camping",
     description: "description of the camping",
+    city: "Metz",
     bungalows: 5,
     tentPlaces: 15,
     campingcarPlaces: 12
@@ -32,6 +34,7 @@ export const CampingCreateContract = Joi.object({
     }).required(),
     name: Joi.string().required(),
     description: Joi.string().required(),
+    city: Joi.string().required(),
     bungalows: Joi.number().required(),
     tentPlaces: Joi.number().required(),
     campingcarPlaces: Joi.number().required()

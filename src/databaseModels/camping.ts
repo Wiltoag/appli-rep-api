@@ -8,6 +8,7 @@ export interface Camping {
     };
     name: string;
     description: string;
+    city: string;
     bungalows: {
         total: number,
         available: number

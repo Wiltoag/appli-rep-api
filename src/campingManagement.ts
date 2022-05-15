@@ -46,6 +46,7 @@ export const routeCampingManagement = (config: Configuration): void => {
             coordinates: body.coordinates,
             name: body.name,
             description: body.description,
+            city: body.city,
             bungalows: {
                 total: body.bungalows,
                 available: body.bungalows
