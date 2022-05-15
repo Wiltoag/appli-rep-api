@@ -109,27 +109,7 @@ export const routeOwnerManagement = (config: Configuration): void => {
             pass: await bcrypt.hash(body.pass, cryptRounds),
             name: body.name,
             token: generateToken(),
-            campings: [{
-                _id: new ObjectId(),
-                coordinates: {
-                    longitude: 45,
-                    latitude: 41
-                },
-                name: "camping de " + body.name,
-                description: "une description",
-                tentPlaces: {
-                    total: 12,
-                    available: 3
-                },
-                campingcarPlaces: {
-                    total: 12,
-                    available: 3
-                },
-                bungalows: {
-                    total: 12,
-                    available: 3
-                }
-            }]
+            campings: []
         };
         config.owners.insertOne(owner);
 
