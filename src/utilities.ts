@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Errors } from './errors';
 
 export const normalize = (str: string): string => {
     return str.normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(" ", "").toLowerCase().replace(/\W/g, "");
@@ -16,7 +17,7 @@ export const escapeHtml = (text: string): string => {
 }
 
 export const invalidJson = (scheme: object): object => {
-    return { error: "Invalid JSON format", expected: scheme };
+    return { ...Errors.invalidJson, expected: scheme };
 }
 
 export const generateToken = () => {

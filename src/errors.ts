@@ -15,4 +15,12 @@ export abstract class Errors {
         error: "Owner id already exists",
         code: 3
     };
+    static invalidJson = {
+        error: "Invalid JSON format",
+        code: 4
+    };
+    static campingIdDoesNotExist = {
+        error: "The camping with this id does not exist",
+        code: 5
+    };
 }
