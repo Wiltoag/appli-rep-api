@@ -54,5 +54,7 @@ L'API tournera sur le port `16548`.
 - `POST host:16548/owner/generate-token` pour regénérer le token d'un propriétaire. Retourne un token.
 - `POST host:16548/user/change-pass` pour changer le mot de passe d'un utilisateur (vacancier). Régénère également le token. Retourne un token.
 - `POST host:16548/owner/change-pass` pour changer le mot de passe d'un propriétaire. Régénère également le token. Retourne un token.
-- `GET host:16548/campings` Renvoie une liste de tous les campings disponibles.
-- `GET host:16548/campings/me` Renvoie une liste de tous les campings posté par le propriétaire. Nécéssite un token de propriétaire.
+- `GET host:16548/campings` Renvoie une liste de tous les identifiants de campings disponibles.
+- `GET host:16548/campings/me` Renvoie une liste de tous les identifiants de campings posté par le propriétaire. Nécéssite un token de propriétaire.
+- `GET host:16548/campings/detail` Renvoie un détail complet d'un camping.
+- `POST host:16548/campings/create` Permet de créer un camping. Renvoie un identifiant de camping. Nécéssite un token de propriétaire.
